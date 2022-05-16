@@ -2,9 +2,9 @@
 
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ## Description 
-a Node.js Employee Tracker
+a Node.js SQL based Employee Tracker
 
-
+## Video Link : https://drive.google.com/file/d/18lxqLnPPCaG4HL1aoSDD4JZaR6utvllz/view
 ## Table of contents
 
 - [Installation](#installation)

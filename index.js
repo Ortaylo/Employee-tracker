@@ -1,10 +1,8 @@
+// requiring package variables
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-const { addAbortSignal } = require('stream');
-const { inherits } = require('util');
-const some = `SELECT * FROM employee;`
 var departments;
 var roles;
 var employees;
@@ -15,9 +13,9 @@ const db = mysql.createConnection(
     password: 'np2-vJhT@3$%',
     database: 'inventory_db'
 }, 
-console.log('Success')
+console.log('Successfully connected to Database')
 );
-
+// Questions object
 var questions = {
     start: {
         type: 'list',
@@ -29,8 +27,8 @@ var questions = {
         'view all departments',
         'view all roles',
         'view all employees',
-        'update employee role',
-        'prompt']
+        'update employee role'
+        ]
     },
     sqlInput: {
         type: 'input',
@@ -89,20 +87,7 @@ var questions = {
             choices: []
     }
 }
-var test;
-const Query = (query,param) => {
-
-   db.query(query, null, (err,result) => {
-        if (err) {
-            return;
-        } else {
-            console.table(result)
-        }
-    });
-    return test;
-
-}
-
+// Update employee role
 const updateRole = () => {
     inquirer.prompt(questions.updateRole).then ( (data) => {
         var first_name = data.employee.split(' ')[0];
@@ -112,13 +97,11 @@ const updateRole = () => {
             roles.find(o => o.role_title == data.role_title).id
             
             start();
-        })
+        });
     }
-    )
-    
-    
-}
-
+    );
+};
+// View roles table
 const viewRoles = () => {
     var obj = [];
             for(var i = 0; i< roles.length; i++) {
@@ -142,7 +125,7 @@ const viewRoles = () => {
             start();
     
 };
-
+//view employees table
 const viewEmployees = ()=> {
     var obj = [];
     for(var i = 0; i< employees.length; i++) {
@@ -181,8 +164,8 @@ const viewEmployees = ()=> {
     };
     console.table(obj);
     start();
-}
-
+};
+// general input values function
 const inputValue = (table,column,value) => {
     db.query(`INSERT INTO ${table} (${column}) VALUES (${value});`, null, (err,result) => {
         if (err) {
@@ -191,14 +174,11 @@ const inputValue = (table,column,value) => {
         start();
     });
 };
-
-    
-
+// function to add a row to roles table
  async function addRole(data){
     let obj = {
         role_title: data.role_title
     }
-    
    await inquirer.prompt(questions.addRole.salary)
    .then((data) => { obj.salary = data.salary});
    await inquirer.prompt(questions.addRole.department)
@@ -211,9 +191,8 @@ const inputValue = (table,column,value) => {
    } catch (error){
     console.err(error);
    }
-   
 };
-    
+    // function to add row to employees table
  async function addEmployee(data){
     let obj = {
         first_name: data.first_name
@@ -226,8 +205,6 @@ const inputValue = (table,column,value) => {
      obj.role_id =  roles.find(o => o.role_title === data.role_title).id
     });
 
-   
-
     await inquirer.prompt(questions.addEmployee.manager)
     .then((data) => {
         if (data.manager_id == 'No Manager') {
@@ -237,22 +214,13 @@ const inputValue = (table,column,value) => {
             var last_name = data.manager_id.split(' ')[1];
             obj.manager_id = employees.find(o => o.last_name === last_name).id;
         }
-        
     });
-
     questions.addEmployee.manager.choices.push(obj.first_name + ' ' + obj.last_name);
     questions.updateRole.choices.push(obj.first_name + ' ' + obj.last_name);
     choicePush();
   inputValue('employees','first_name,last_name,role_id,manager_id',`"${obj.first_name}","${obj.last_name}",${obj.role_id},${obj.manager_id}`);
-
-  
 };
-
-
-
-    
-    
- 
+ // function containing starting prompts
 const start = () => {
     choicePush();
     inquirer.prompt(questions.start).then( (data) => {
@@ -277,8 +245,6 @@ const start = () => {
             viewRoles();
         }else if (data.start == 'view all employees'){
             viewEmployees();
-        } else if (data.start == 'prompt'){
-            prompt();
         } else if (data.start == 'update employee role') {
             updateRole();
         } else {
@@ -286,24 +252,9 @@ const start = () => {
             console.table(data)
         }
     });
-}
-
-const prompt = () => {
-    inquirer.prompt(questions.sqlInput).then( (data) => {
-        db.query(data.query, null, (err,result) => {
-            if (err) {
-                console.error(err);
-                prompt();
-            } else {
-                console.table(result)
-                prompt();
-            }
-        });
-    });
-}
-
+};
+// function to push table information to questions object choices/ update general variables
 const choicePush = (param) => {
-    
     db.query('SELECT * FROM departments',null, (err,results) => {
         if (err) {
             console.error(err);
@@ -312,9 +263,9 @@ const choicePush = (param) => {
             if (param == 'return') {
             for (var i = 0;i<departments.length;i++) {
                 questions.addRole.department.choices.push(departments[i].department_name)
-            }
-        }
-        }
+            };
+        };
+        };
     })
     db.query('SELECT * FROM roles',null, (err,results) => {
         if (err) {
@@ -327,7 +278,6 @@ const choicePush = (param) => {
                 }
             }
         }
-        
     })
     db.query('SELECT * FROM employees',null, (err,results) => {
         if (err) {
@@ -336,17 +286,13 @@ const choicePush = (param) => {
             employees =results;    
             if (param == 'return') {
                 for (var i = 0;i<employees.length;i++) {
-                    questions.addEmployee.manager.choices.push(employees[i].first_name + ' ' + employees[i].last_name)
-                    questions.updateRole.choices.push(employees[i].first_name + ' ' + employees[i].last_name)
-                }
-            }
-        }
-    })
-    
-    
-}
-
-
+                    questions.addEmployee.manager.choices.push(employees[i].first_name + ' ' + employees[i].last_name);
+                    questions.updateRole.choices.push(employees[i].first_name + ' ' + employees[i].last_name);
+                };
+            };
+        };
+    });
+};
 
 
 choicePush('return');
